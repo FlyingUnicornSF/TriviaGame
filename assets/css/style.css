@@ -1,0 +1,19 @@
+/*#65DBD3 green
+#574E45 brown
+#E6B1F2 pink
+#B2D1FF blue
+#224B7B darkBlue
+*/
+
+ body {
+  background-image: url("../images/space-cat-wallpapers.jpg");
+  color: #d5c1dc;
+  font-family: 'Cabin Sketch', cursive;  
+  font-size: 2em;
+}
+h1{
+  font-family: 'Rock Salt', cursive;
+}
+.container {
+
+}
