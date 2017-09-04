@@ -7,8 +7,8 @@
 
  body {
   background-image: url("../images/space-cat-wallpapers.jpg");
-  color: #d5c1dc;
-  font-family: 'Cabin Sketch', cursive;  
+  color: white;
+  font-family: 'Wendy One', sans-serif; 
   font-size: 2em;
 }
 h1{
@@ -16,4 +16,10 @@ h1{
 }
 .container {
 
+}
+
+.list{
+  background-color: rgba(101, 219, 211, 0.45);
+  padding: 0.5em;
+  margin: 1em;
 }
