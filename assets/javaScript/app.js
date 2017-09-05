@@ -75,7 +75,7 @@ window.onload = function() {
     initiate: function (argument) {
       this.idx = 0;
       this.prevIdx = 0,
-      this.timeRemaining = undefined,
+      this.timeRemaining = this.pickAnswerTimer,
       this.timerRunning = undefined,
       this.correctCounter = undefined,
       this.wrongCounter = undefined,
@@ -86,37 +86,48 @@ window.onload = function() {
     count: function(){
       $('#timer').text(catIam.timeRemaining);
       catIam.timeRemaining --;
-      console.log("I'm in counter")
+      console.log("I'm in counter");
+      $('.list').on('click', function(cat){
+        catIam.stopTimer();
+      });
       if(catIam.timeRemaining < 0) {
         catIam.stopTimer();
       }
     },
 
-    runTimer: function (milSec, duration) {
-      catIam.timeRemaining = duration; 
+    runTimer: function () { 
       console.log(catIam.timeRemaining)
-      intervalId = setInterval(catIam.count, milSec);
+      intervalId = setInterval(catIam.count, 1000);
       this.timerRunning = true;  
     }, //closing runTimer
 
-    stopTimer: function(fromWhere){
+    stopTimer: function(){
   
       console.log("I'm in stopTimer")
       clearInterval(intervalId);
       this.timerRunning = false;
       this.timeRemaining = undefined;
+      idx = catIam.idx;
+      prevIdx = catIam.prevIdx;
+        
+        if (idx == 6) {
+          this.loadScore();
+        } else if(prevIdx !== idx) {
+          this.loadDiv(this.questionList, idx);
+        } else if (prevIdx == idx) {
+          var question =  this.questionList[idx];
+          var videoID = question.vidID;
+          var result = 2;
+          var answerTest = question.answer;
+          this.loadAnswer(result, videoID, answerTest);
+        }
       console.log(this.prevIdx +" prevIdx")
       console.log(this.idx +" idx")
-      if (this.prevIdx == this.idx) {
-        this.compare("TimerStopped", catIam.idx);
-      } else if(catIam.prevIdx !== catIam.idx) {
-        this.loadDiv(catIam.questionList, catIam.idx);
-      } else {console.log("something went really wrong!")}
-
     },
 
     loadDiv: function(list, idx) {
       $("#main").empty();
+      this.timeRemaining = this.pickAnswerTimer;
       $.each(list[idx], function(key, value) {
         console.log("i'm in loadQuestion");
         var listDiv = $('<div id="'+key+'" class="text-center list">'+value+'</div>');
@@ -126,13 +137,18 @@ window.onload = function() {
         return (key !== "answer4"); //holy poop that worked!
       });//closing this characters forEach function
       this.prevIdx = this.idx;
-      this.runTimer(1000, this.pickAnswerTimer);
+      this.runTimer();
     }, //closing loadQuestion
 
     loadAnswer: function(result, ID, text){
       $("#main").empty();
-      console.log(result)
-      $(".catTalk").text("next question will load");
+      this.timeRemaining = this.showAnswerTimer;
+      console.log(ID)
+      if(catIam.idx == 6){
+        $(".catTalk").text("Show your score in");
+      } else {
+        $(".catTalk").text("next question will load");
+      }
       //load result div and vid div
       if(result == 1){
         resultDiv = $('<div id="result" class="text-center">Correct!</div>');
@@ -144,52 +160,53 @@ window.onload = function() {
 
       vidDiv = $('<div id="player" class="text-center"></div>');
       $("#main").append(resultDiv);
-      $("#main").append(vidDiv);
+      $("#result").append(vidDiv);
       var vidID = ID;
       this.playVid(vidID);
       catIam.increment(catIam.idx);
       result = undefined;
-      this.runTimer(1000, this.showAnswerTimer);
-      
+      this.runTimer();
+    },
+
+    loadScore: function(){
+      $("#main").empty();
     },
 
     playVid: function(id) {
       console.log("i'm in playVid function")
-      var player = new YT.Player('player', {
-          height: '290',
-          width: '340',
-          videoId: id, 
-          events: {
-              'onReady': function(event) {
-                  event.target.playVideo();
-              },
+      // var player = new YT.Player('player', {
+      //     height: '290',
+      //     width: '340',
+      //     videoId: id, 
+      //     events: {
+      //         'onReady': function(event) {
+      //             event.target.playVideo();
+      //         },
 
-          }
-      });
+      //     }
+      // });
     },
 
     compare: function(answer, index){
       var question =  this.questionList[index];
-      var answerTest = question.answer2;
+      var answerTest = question.answer;
       console.log(index +" in compare")
-      var result = undefined;
+      console.log(answer)
       if (question.answer == answer){
         result = 1;
         console.log("yay")
         this.correctCounter ++;
-
-      } else if(answer == "TimerStopped") {
-        this.wrong ++;
       } else {
         result = 0;
         console.log("boo")
         this.wrongCounter ++;
       }
+      var result = undefined;
       //play video
       var videoID = question.vidID;
       this.loadAnswer(result, videoID, answerTest);
     },
-
+    
     increment: function(i){
       console.log("I'm in increment")
       this.prevIdx = i;
@@ -202,12 +219,14 @@ window.onload = function() {
   
   catIam.initiate();
   //player pick an answer
-  $('.list').on('click', function(cat){
-    catIam.stopTimer();
-    catIam.picked = $(this).attr("id");
-    catIam.compare(catIam.picked, catIam.idx);
+  // $('.list').on('click', function(cat){
+
+  //   console.log("I'm in on click")
+  //   catIam.picked = $(this).attr("id");
+  //   //catIam.compare(catIam.picked, catIam.idx);
+  //   catIam.stopTimer();
     
-  });
+  // });
 
 
 }; // Closing onload 
