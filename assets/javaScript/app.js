@@ -5,9 +5,15 @@ window.onload = function() {
   var catIam = {
 
     idx: undefined,
+    prevIdx: undefined,
     timeRemaining: undefined,
     timerRunning: undefined,
     picked: undefined,
+    pickAnswerTimer: 5,
+    showAnswerTimer: 6,
+    correctCounter: undefined,
+    wrongCounter: undefined,
+
     questionList: [
       {
         "question": "Q: on average how many whiskers does a cat have?",
@@ -68,8 +74,13 @@ window.onload = function() {
 
     initiate: function (argument) {
       this.idx = 0;
+      this.prevIdx = 0,
+      this.timeRemaining = undefined,
+      this.timerRunning = undefined,
+      this.correctCounter = undefined,
+      this.wrongCounter = undefined,
       this.loadDiv(this.questionList, this.idx);
-      this.runTimer(1000, 10);
+      
     },
 
     count: function(){
@@ -82,46 +93,64 @@ window.onload = function() {
     },
 
     runTimer: function (milSec, duration) {
-      console.log(duration)
       catIam.timeRemaining = duration; 
       console.log(catIam.timeRemaining)
       intervalId = setInterval(catIam.count, milSec);
-      this.timerRunning = true;
+      this.timerRunning = true;  
     }, //closing runTimer
 
-    stopTimer: function(){
+    stopTimer: function(fromWhere){
+  
+      console.log("I'm in stopTimer")
       clearInterval(intervalId);
       this.timerRunning = false;
+      this.timeRemaining = undefined;
+      console.log(this.prevIdx +" prevIdx")
+      console.log(this.idx +" idx")
+      if (this.prevIdx == this.idx) {
+        this.compare("TimerStopped", catIam.idx);
+      } else if(catIam.prevIdx !== catIam.idx) {
+        this.loadDiv(catIam.questionList, catIam.idx);
+      } else {console.log("something went really wrong!")}
+
     },
 
     loadDiv: function(list, idx) {
-      console.log(list[idx]);
+      $("#main").empty();
       $.each(list[idx], function(key, value) {
         console.log("i'm in loadQuestion");
-        console.log(value);
         var listDiv = $('<div id="'+key+'" class="text-center list">'+value+'</div>');
         listDiv.hide();
         $("#main").append(listDiv);
         listDiv.fadeIn('slow');
         return (key !== "answer4"); //holy poop that worked!
       });//closing this characters forEach function
+      this.prevIdx = this.idx;
+      this.runTimer(1000, this.pickAnswerTimer);
     }, //closing loadQuestion
 
     loadAnswer: function(result, ID, text){
       $("#main").empty();
+      console.log(result)
+      $(".catTalk").text("next question will load");
       //load result div and vid div
-      if(result){
+      if(result == 1){
         resultDiv = $('<div id="result" class="text-center">Correct!</div>');
+      } else if(result == 0) {
+        resultDiv = $('<div id="result" class="text-center">Wrong, the correct answer is: '+text+'</div>')
       } else {
-        resultDiv = $('<div id="result" class="text-center">Wrong, the correct answer is:'+text+'</div>')
+        resultDiv = $('<div id="result" class="text-center">Out of time ¯&bsol;_(ツ)_/¯"</div>');
       }
+
       vidDiv = $('<div id="player" class="text-center"></div>');
       $("#main").append(resultDiv);
       $("#main").append(vidDiv);
       var vidID = ID;
       this.playVid(vidID);
-      this.runTimer(1000, 15);
-
+      catIam.increment(catIam.idx);
+      result = undefined;
+      this.runTimer(1000, this.showAnswerTimer);
+      
     },
 
     playVid: function(id) {
@@ -145,12 +174,16 @@ window.onload = function() {
       console.log(index +" in compare")
       var result = undefined;
       if (question.answer == answer){
-        result = true;
+        result = 1;
         console.log("yay")
+        this.correctCounter ++;
 
+      } else if(answer == "TimerStopped") {
+        this.wrong ++;
       } else {
-        result = false;
+        result = 0;
         console.log("boo")
+        this.wrongCounter ++;
       }
       //play video
       var videoID = question.vidID;
@@ -158,22 +191,22 @@ window.onload = function() {
     },
 
     increment: function(i){
+      console.log("I'm in increment")
+      this.prevIdx = i;
       i++;
       this.idx = i;
       //only up to i = 5
     },
-  
-    
 
   }; //closing cat I am 
   
   catIam.initiate();
   //player pick an answer
   $('.list').on('click', function(cat){
+    catIam.stopTimer();
     catIam.picked = $(this).attr("id");
     catIam.compare(catIam.picked, catIam.idx);
-    catIam.increment(catIam.idx);
-    catIam.stopTimer();
+    
   });
 
 
