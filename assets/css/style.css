@@ -29,3 +29,13 @@ li {
 .panel-heading {
   color: black;
 }
+
+div#vidContainer {
+  margin-top: 2em;
+}
+
+div#main.panel.score{
+  {
+    margin: auto;
+    background-color: rgba(235, 199, 243, 0.6);
+}

@@ -9,8 +9,8 @@ window.onload = function() {
         timeRemaining: undefined,
         timerRunning: undefined,
         picked: undefined,
-        pickAnswerTimer: 5,
-        showAnswerTimer: 3,
+        pickAnswerTimer: 30,
+        showAnswerTimer: 15,
         correctCounter: undefined,
         wrongCounter: undefined,
         outOfTimeCounter: undefined,
@@ -82,7 +82,7 @@ window.onload = function() {
             this.wrongCounter = 0,
             this.outOfTimeCounter = 0,
             
-            $('.container').append('<div id="main"><button class="btn" type="submit">Start the Game</button></div');
+            $('.container').append('<div id="main"><button class="btn start" type="submit">Start the Game</button></div');
             $('.btn').on('click', function() {
                 catIam.loadDiv(catIam.questionList, catIam.idx);
             });
@@ -97,21 +97,22 @@ window.onload = function() {
             // stop the timer when timer runs out
             if (catIam.timeRemaining < 0) {
                 catIam.stopTimer();
-                idx = catIam.idx;
-                prevIdx = catIam.prevIdx;
-                if (idx == 6) {
+                index = catIam.idx;
+                prevIndex = catIam.prevIdx;
+                if (index === 6) {
                     catIam.loadScore();
                     console.log("loadScore")
-                } else if (prevIdx !== idx) {
+                } else if (prevIndex !== index) {
                     console.log('loadDiv')
-                    catIam.loadDiv(catIam.questionList, idx);
-                } else if (prevIdx == idx) {
+                    catIam.loadDiv(catIam.questionList, index);
+                } else if (prevIndex === index) {
                     console.log('loadAnswer')
                     console.log(catIam.questionList)
-                    var question = catIam.questionList[idx];
+                    var question = catIam.questionList[index];  
+                    var answerNum = question.answer;
+                    var answerText = question[answerNum];
                     var videoID = question.vidID;
                     var result = 2;
-                    var answerText = question.answer;
                     catIam.loadAnswer(result, videoID, answerText);
                 }
             } // closing if 
@@ -156,7 +157,6 @@ window.onload = function() {
                 catIam.stopTimer();
                 catIam.compare(catIam.picked, catIam.idx);
             });
-            debugger
             this.runTimer();
         }, //closing loadQuestion
 
@@ -164,11 +164,12 @@ window.onload = function() {
 
             $("#main").empty();
             this.timeRemaining = this.showAnswerTimer;
+            $("#main").append('<div class="catTalk text-center"></div><div class="text-center">in <span id="timer">(x)</span> seconds...</div>');
 
-            if (catIam.idx == 5) {
+            if (catIam.idx === 5) {
                 $(".catTalk").text("Show your score in");
             } else {
-                $(".catTalk").text("next question will load");
+                $(".catTalk").text("next question will load in");
             }
             //load result div and vid div
             if (result == 1) {
@@ -180,42 +181,16 @@ window.onload = function() {
                 resultDiv = $('<div id="result" class="text-center">Out of time ¯&bsol;_(ツ)_/¯ the correct answer is: ' + text + '</div></div>');
             }
 
-            vidDiv = $('<div id="player" class="text-center"></div>');
+            vidDiv = $('<div id="player"></div>');
+
             $("#main").append(resultDiv);
-            $("#main").append(vidDiv);
+            $("#main").append('<div id="vidContainer" style="display:flex; width:350px; margin:auto; margin-top: 20px;"></div>');            
+            $("#vidContainer").append(vidDiv);
             var vidID = ID;
             this.playVid(vidID);
             this.increment(catIam.idx);
-            debugger
             this.runTimer();
         }, // closing load answer 
-
-        loadScore: function() {
-            $(".container").empty();
-            panelDiv = $('<div class="panel"></div>');
-            panelHeadingDiv = $('<div class="panel-heading">You Score is</div>');
-            ulDiv = $('<ul class="list-group"></ul>');
-            liDivCorrect = $('<li class="list-group-item">Correct Answers '+this.correctCounter+'</li>');
-            liDivWrong = $('<li class="list-group-item">Wrong Answers ' +this.wrongCounter+'</li>');
-            liDivOutOfTime = $('<li class="list-group-item">Unanswers '+this.outOfTimeCounter+'</li>')
-
-            $(".container").append(panelDiv);
-            $(".panel").append(panelHeadingDiv);
-            $(".panel").append(ulDiv);
-            $(".list-group").append(liDivCorrect);
-            $(".list-group").append(liDivWrong);
-            $(".list-group").append(liDivOutOfTime);
-            $('.container').append('<button class="btn btn-default" type="submit">Restart?</button>');
-
-            $('.btn').on('click', function() {
-                this.initiate();
-            });
-            
-        }, // closing loadScore
-
-        loadStart: function (argument) {
-            // body...
-        }, // closing load start
 
         playVid: function(id) {
             console.log("i'm in playVid function")
@@ -231,10 +206,34 @@ window.onload = function() {
             });
         }, // closing play vid
 
+        loadScore: function() {
+            $(".container").empty();
+            panelDiv = $('<div class="panel score"></div>');
+            panelHeadingDiv = $('<div class="panel-heading">You Score is:</div>');
+            ulDiv = $('<ul class="list-group"></ul>');
+            liDivCorrect = $('<li class="list-group-item">Correct Answers: '+this.correctCounter+'</li>');
+            liDivWrong = $('<li class="list-group-item">Wrong Answers: ' +this.wrongCounter+'</li>');
+            liDivOutOfTime = $('<li class="list-group-item">Unanswered: '+this.outOfTimeCounter+'</li>')
+
+            $(".container").append('<div id="main"></div>')
+            $("#main").append(panelDiv);
+            $(".panel").append(panelHeadingDiv);
+            $(".panel").append(ulDiv);
+            $(".list-group").append(liDivCorrect);
+            $(".list-group").append(liDivWrong);
+            $(".list-group").append(liDivOutOfTime);
+            $('.container').append('<button class="btn btn-default" type="submit">Restart?</button>');
+
+            $('.btn').on('click', function() {
+                catIam.initiate();
+            });
+            
+        }, // closing loadScore
+
         compare: function(pick, index) {
             var question = this.questionList[index];  
             var answerNum = question.answer;
-            var answerText = this.questionList[index][answerNum];
+            var answerText = question[answerNum];
           
             // var answerText = 
             // console.log(answerText)
