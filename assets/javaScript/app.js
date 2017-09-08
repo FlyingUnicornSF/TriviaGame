@@ -10,9 +10,10 @@ window.onload = function() {
         timerRunning: undefined,
         picked: undefined,
         pickAnswerTimer: 5,
-        showAnswerTimer: 8,
+        showAnswerTimer: 3,
         correctCounter: undefined,
         wrongCounter: undefined,
+        outOfTimeCounter: undefined,
 
         questionList: [{
                 "question": "Q: on average how many whiskers does a cat have?",
@@ -72,13 +73,19 @@ window.onload = function() {
         ],
 
         initiate: function(argument) {
+            $(".container").empty();
             this.idx = 0;
             this.prevIdx = 0,
-                this.timeRemaining = this.pickAnswerTimer,
-                this.timerRunning = undefined,
-                this.correctCounter = undefined,
-                this.wrongCounter = undefined,
-                this.loadDiv(this.questionList, this.idx);
+            this.timeRemaining = this.pickAnswerTimer,
+            this.timerRunning = undefined,
+            this.correctCounter = 0,
+            this.wrongCounter = 0,
+            this.outOfTimeCounter = 0,
+            
+            $('.container').append('<div id="main"><button class="btn" type="submit">Start the Game</button></div');
+            $('.btn').on('click', function() {
+                catIam.loadDiv(catIam.questionList, catIam.idx);
+            });
 
         },
 
@@ -104,8 +111,8 @@ window.onload = function() {
                     var question = catIam.questionList[idx];
                     var videoID = question.vidID;
                     var result = 2;
-                    var answerTest = question.answer;
-                    catIam.loadAnswer(result, videoID, answerTest);
+                    var answerText = question.answer;
+                    catIam.loadAnswer(result, videoID, answerText);
                 }
             } // closing if 
         }, // closing count function 
@@ -129,6 +136,8 @@ window.onload = function() {
 
         loadDiv: function(list, idx) {
             $("#main").empty();
+            $("#main").append('<div class="catTalk text-center">Pick an answer... or I will push a puppy off the universe</div><div class="text-center">in <span id="timer">(x)</span> seconds...</div>');
+
             this.timeRemaining = this.pickAnswerTimer;
             $.each(list[idx], function(key, value) {
                 console.log("i'm in loadQuestion");
@@ -141,21 +150,22 @@ window.onload = function() {
             this.prevIdx = this.idx;
 
             //player pick an answer
-            $('.list').on('click', function(cat) {
+            $('.list').on('click', function() {
                 console.log("I'm in on click")
                 catIam.picked = $(this).attr("id");
                 catIam.stopTimer();
                 catIam.compare(catIam.picked, catIam.idx);
             });
-
+            debugger
             this.runTimer();
         }, //closing loadQuestion
 
         loadAnswer: function(result, ID, text) {
+
             $("#main").empty();
             this.timeRemaining = this.showAnswerTimer;
-            console.log(ID)
-            if (catIam.idx == 6) {
+
+            if (catIam.idx == 5) {
                 $(".catTalk").text("Show your score in");
             } else {
                 $(".catTalk").text("next question will load");
@@ -164,23 +174,48 @@ window.onload = function() {
             if (result == 1) {
                 resultDiv = $('<div id="result" class="text-center">Correct!</div>');
             } else if (result == 0) {
-                resultDiv = $('<div id="result" class="text-center">Wrong, the correct answer is: ' + text + '</div>')
+                resultDiv = $('<div id="result" class="text-center">Wrong, the correct answer is: ' + text + '</div>');
             } else {
-                resultDiv = $('<div id="result" class="text-center">Out of time ¯&bsol;_(ツ)_/¯"</div>');
+                this.outOfTimeCounter++;
+                resultDiv = $('<div id="result" class="text-center">Out of time ¯&bsol;_(ツ)_/¯ the correct answer is: ' + text + '</div></div>');
             }
 
             vidDiv = $('<div id="player" class="text-center"></div>');
             $("#main").append(resultDiv);
-            $("#result").append(vidDiv);
+            $("#main").append(vidDiv);
             var vidID = ID;
             this.playVid(vidID);
-            catIam.increment(catIam.idx);
+            this.increment(catIam.idx);
+            debugger
             this.runTimer();
         }, // closing load answer 
 
         loadScore: function() {
-            $("#main").empty();
+            $(".container").empty();
+            panelDiv = $('<div class="panel"></div>');
+            panelHeadingDiv = $('<div class="panel-heading">You Score is</div>');
+            ulDiv = $('<ul class="list-group"></ul>');
+            liDivCorrect = $('<li class="list-group-item">Correct Answers '+this.correctCounter+'</li>');
+            liDivWrong = $('<li class="list-group-item">Wrong Answers ' +this.wrongCounter+'</li>');
+            liDivOutOfTime = $('<li class="list-group-item">Unanswers '+this.outOfTimeCounter+'</li>')
+
+            $(".container").append(panelDiv);
+            $(".panel").append(panelHeadingDiv);
+            $(".panel").append(ulDiv);
+            $(".list-group").append(liDivCorrect);
+            $(".list-group").append(liDivWrong);
+            $(".list-group").append(liDivOutOfTime);
+            $('.container').append('<button class="btn btn-default" type="submit">Restart?</button>');
+
+            $('.btn').on('click', function() {
+                this.initiate();
+            });
+            
         }, // closing loadScore
+
+        loadStart: function (argument) {
+            // body...
+        }, // closing load start
 
         playVid: function(id) {
             console.log("i'm in playVid function")
@@ -196,14 +231,14 @@ window.onload = function() {
             });
         }, // closing play vid
 
-        compare: function(answer, index) {
-            var question = this.questionList[index];
-            console.log(question.answer)
-            debugger
-            var answerTest = question.answer;
-            console.log(index + " in compare")
-            console.log(answer)
-            if (question.answer == answer) {
+        compare: function(pick, index) {
+            var question = this.questionList[index];  
+            var answerNum = question.answer;
+            var answerText = this.questionList[index][answerNum];
+          
+            // var answerText = 
+            // console.log(answerText)
+            if (question.answer == pick) {
                 var result = 1;
                 console.log("yay")
                 this.correctCounter++;
@@ -212,11 +247,9 @@ window.onload = function() {
                 console.log("boo")
                 this.wrongCounter++;
             }
-
-            //play video$
             var videoID = question.vidID;
             // load answer according to result then clear result for the next round
-            this.loadAnswer(result, videoID, answerTest);
+            this.loadAnswer(result, videoID, answerText);
             var result = undefined;
         }, //closing compare
 

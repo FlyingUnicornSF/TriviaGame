@@ -5,7 +5,8 @@
 #224B7B darkBlue
 */
 
- body {
+
+body {
   background-image: url("../images/space-cat-wallpapers.jpg");
   color: white;
   font-family: 'Wendy One', sans-serif; 
@@ -14,12 +15,17 @@
 h1{
   font-family: 'Rock Salt', cursive;
 }
-.container {
 
-}
-
-.list{
+.list {
   background-color: rgba(101, 219, 211, 0.45);
   padding: 0.5em;
   margin: 1em;
+}
+
+li {
+  color: black;
+}
+
+.panel-heading {
+  color: black;
 }
