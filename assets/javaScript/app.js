@@ -184,7 +184,8 @@ window.onload = function() {
             vidDiv = $('<div id="player"></div>');
 
             $("#main").append(resultDiv);
-            $("#main").append('<div id="vidContainer" style="display:flex; width:350px; margin:auto; margin-top: 20px;"></div>');            
+            $("#main").append('<div id="vidContainer"></div>');            
+            // $("#main").append('<div id="vidContainer" style="display:flex; width:350px; margin:auto; margin-top: 20px;"></div>');            
             $("#vidContainer").append(vidDiv);
             var vidID = ID;
             this.playVid(vidID);

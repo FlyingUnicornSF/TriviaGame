@@ -31,7 +31,10 @@ li {
 }
 
 div#vidContainer {
-  margin-top: 2em;
+  display:flex; 
+  width:350px; 
+  margin:auto; 
+  margin-top: 20px;
 }
 
 div#main.panel.score{
