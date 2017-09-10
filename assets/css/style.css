@@ -37,8 +37,7 @@ div#vidContainer {
   margin-top: 20px;
 }
 
-div#main.panel.score{
-  {
+div#main.panel.score {
     width: 65%;
     margin: auto;
     background-color: rgba(235, 199, 243, 0.6);
