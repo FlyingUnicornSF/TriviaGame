@@ -1,3 +1,5 @@
+// Nice job putting everything in a function to keep things from
+// leaking onto the global scope 👌
 window.onload = function() {
 
 
@@ -75,12 +77,14 @@ window.onload = function() {
         initiate: function(argument) {
             $(".container").empty();
             this.idx = 0;
-            this.prevIdx = 0,
-            this.timeRemaining = this.pickAnswerTimer,
-            this.timerRunning = undefined,
-            this.correctCounter = 0,
-            this.wrongCounter = 0,
-            this.outOfTimeCounter = 0,
+
+            // not sure why you are ending each of these statements with commas..
+            this.prevIdx = 0
+            this.timeRemaining = this.pickAnswerTimer
+            this.timerRunning = undefined
+            this.correctCounter = 0
+            this.wrongCounter = 0
+            this.outOfTimeCounter = 0
             
             $('.container').append('<div id="main"><button class="btn start" type="submit">Start the Game</button></div');
             $('.btn').on('click', function() {
@@ -92,22 +96,28 @@ window.onload = function() {
         count: function() {
             $('#timer').text(catIam.timeRemaining);
             catIam.timeRemaining--;
-            console.log("I'm in counter");
+
+            // console.log is great for development, but try to keep them out of your production code.
+            // console.log("I'm in counter");
 
             // stop the timer when timer runs out
             if (catIam.timeRemaining < 0) {
                 catIam.stopTimer();
                 index = catIam.idx;
                 prevIndex = catIam.prevIdx;
+
+                // instead of hardcoding this value in, it would be nice to set it to be whatever the 
+                // length of the questions array is. That way you won't have to update this value if you
+                // were to add more questions.
                 if (index === 6) {
                     catIam.loadScore();
-                    console.log("loadScore")
+                    // console.log("loadScore")
                 } else if (prevIndex !== index) {
-                    console.log('loadDiv')
+                    // console.log('loadDiv')
                     catIam.loadDiv(catIam.questionList, index);
                 } else if (prevIndex === index) {
-                    console.log('loadAnswer')
-                    console.log(catIam.questionList)
+                    // console.log('loadAnswer')
+                    // console.log(catIam.questionList)
                     var question = catIam.questionList[index];  
                     var answerNum = question.answer;
                     var answerText = question[answerNum];
@@ -120,19 +130,21 @@ window.onload = function() {
 
         runTimer: function() {
 
-            console.log(catIam.timeRemaining + " timeRemaining")
+            // console.log(catIam.timeRemaining + " timeRemaining")
+
+            // since you aren't declaring intervalId anywhere, this variable ends up being placed on the global scope 😮
             intervalId = setInterval(catIam.count, 1000);
             this.timerRunning = true;
         }, //closing runTimer
 
         stopTimer: function() {
 
-            console.log("I'm in stopTimer")
+            // console.log("I'm in stopTimer")
             clearInterval(intervalId);
             this.timerRunning = false;
             this.timeRemaining = undefined;
-            console.log(this.prevIdx + " prevIdx")
-            console.log(this.idx + " idx")
+            // console.log(this.prevIdx + " prevIdx")
+            // console.log(this.idx + " idx")
         }, // stop timer
 
         loadDiv: function(list, idx) {
@@ -141,7 +153,7 @@ window.onload = function() {
 
             this.timeRemaining = this.pickAnswerTimer;
             $.each(list[idx], function(key, value) {
-                console.log("i'm in loadQuestion");
+                // console.log("i'm in loadQuestion");
                 var listDiv = $('<div id="' + key + '" class="text-center list">' + value + '</div>');
                 listDiv.hide();
                 $("#main").append(listDiv);
@@ -152,7 +164,7 @@ window.onload = function() {
 
             //player pick an answer
             $('.list').on('click', function() {
-                console.log("I'm in on click")
+                // console.log("I'm in on click")
                 catIam.picked = $(this).attr("id");
                 catIam.stopTimer();
                 catIam.compare(catIam.picked, catIam.idx);
@@ -172,13 +184,15 @@ window.onload = function() {
                 $(".catTalk").text("next question will load in");
             }
             //load result div and vid div
+            // The only thing different about each of these result divs is the text inside. So, to save some tedious markup writing,
+            // I'd suggest just making the div once and then setting the text based on the following conditional statements.
             if (result == 1) {
                 resultDiv = $('<div id="result" class="text-center">Correct!</div>');
             } else if (result == 0) {
                 resultDiv = $('<div id="result" class="text-center">Wrong, the correct answer is: ' + text + '</div>');
             } else {
                 this.outOfTimeCounter++;
-                resultDiv = $('<div id="result" class="text-center">Out of time ¯&bsol;_(ツ)_/¯ the correct answer is: ' + text + '</div></div>');
+                resultDiv = $('<div id="result" class="text-center">Out of time ¯&bsol;_(ツ)_/¯ the correct answer is: ' + text + '</div>');
             }
 
             vidDiv = $('<div id="player"></div>');
@@ -194,7 +208,7 @@ window.onload = function() {
         }, // closing load answer 
 
         playVid: function(id) {
-            console.log("i'm in playVid function")
+            // console.log("i'm in playVid function")
             var player = new YT.Player('player', {
                 height: '290',
                 width: '340',
@@ -216,6 +230,8 @@ window.onload = function() {
             liDivWrong = $('<li class="list-group-item">Wrong Answers: ' +this.wrongCounter+'</li>');
             liDivOutOfTime = $('<li class="list-group-item">Unanswered: '+this.outOfTimeCounter+'</li>')
 
+            // So semi-colons are almost always unnecessary in JavaScript, so you can choose to use them or not.
+            // The main thing I'd suggest is to stay consistent one way or the other.
             $(".container").append('<div id="main"></div>')
             $("#main").append(panelDiv);
             $(".panel").append(panelHeadingDiv);
@@ -239,22 +255,28 @@ window.onload = function() {
             // var answerText = 
             // console.log(answerText)
             if (question.answer == pick) {
+                // Unfortunately the var keyword in JS doesn't respect block scopes - it only cares about functional scopes.
+                // So declaring var here has a counter-intuitive result as it is actually being declared in the outer functional
+                // scope. Which also means that the other two `var result` declarations are just redefining the same variable.
+                // To make your code read a bit closer to what is actually happening at run time I'd suggest just declaring 
+                // result once at the top of this function and then assigning the value based on the below conditionals.
                 var result = 1;
-                console.log("yay")
+                // console.log("yay")
                 this.correctCounter++;
             } else {
                 var result = 0;
-                console.log("boo")
+                // console.log("boo")
                 this.wrongCounter++;
             }
             var videoID = question.vidID;
             // load answer according to result then clear result for the next round
             this.loadAnswer(result, videoID, answerText);
+            // This is unnecessary as long as you keep result scoped within this function.
             var result = undefined;
         }, //closing compare
 
         increment: function(i) {
-            console.log("I'm in increment")
+            // console.log("I'm in increment")
             this.prevIdx = i;
             i++;
             this.idx = i;
